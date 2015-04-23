@@ -18,6 +18,15 @@ object MainTweaks
       text(greeting) +
       hide
 
+//  def coords(fLoc: Future[Location]) = {
+//    fLoc map { l ⇒
+//      s"Lat: ${l.getLatitude}, Lon: ${l.getLongitude}"
+//      } map { text }
+//  }
+
+//  def coords(lat: Double, lon: Double)(implicit appCtx: AppContext) =
+//    TextTweaks.large + text(s"Lat: $lat, Lon: $lon")
+
   def orient(implicit appCtx: AppContext) =
     landscape ? horizontal | vertical
 

@@ -41,3 +41,7 @@ proguardOptions in Android ++= Seq(
   "-ignorewarnings",
   "-keep class scala.Dynamic"
 )
+
+// Play Services
+
+libraryDependencies ++= Seq("com.google.android.gms" % "play-services" % "6.5.87")
