@@ -1,0 +1,10 @@
+target/
+.idea
+proguard-sbt.txt
+.history
+
+.idea_modules
+*.log
+.cache
+.lib/
+dist/*
