@@ -1,6 +1,7 @@
 package org.tlc.whereat.components.activities
 
 import android.app.Activity
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.widget.{Button, LinearLayout, TextView}
@@ -12,9 +13,8 @@ import macroid.Contexts
 import macroid.FullDsl._
 import org.tlc.whereat.ui.tweaks.MainTweaks
 
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Promise
-
 
 /**
  * Author: @aguestuser
@@ -25,10 +25,9 @@ import scala.concurrent.Promise
 
 class MainActivity extends Activity with Contexts[Activity] with ConnectionCallbacks with OnConnectionFailedListener { // include implicit contexts
 
-  var context = activityActivityContext
   var apiClient: Option[GoogleApiClient] = None
   var locView: Option[TextView] = slot[TextView]
-  val locText: Promise[String] = Promise[String]()
+  var connectionPromise = Promise[Unit]()
 
   override protected def onCreate(savedInstanceState: Bundle): Unit = {
     super .onCreate(savedInstanceState)
@@ -40,24 +39,21 @@ class MainActivity extends Activity with Contexts[Activity] with ConnectionCallb
         l[LinearLayout](
           w[Button] <~
             text("Get Location") <~
-            On.click {
-              locView <~ show
-            },
+            On.click { locView <~ getLocation.map { l ⇒ text(parseLocation(l)) + show } },
           w[TextView] <~
-            wire(locView) <~
-            locText.future.map(text)
+            wire(locView) <~ hide
         ) <~ MainTweaks.orient } } }
 
   override protected def onStart(): Unit = {
     super.onStart()
-    apiClient.get.connect() }
+    apiClient foreach { _.connect } }
 
   override protected def onStop(): Unit = {
     super.onStop()
-    if (apiClient.get.isConnected) apiClient.get.disconnect() }
+    apiClient foreach { cl ⇒ if(cl.isConnected) cl.disconnect() } }
 
   protected def buildClient: Option[GoogleApiClient] = {
-    Log.i("whereat", "running buildClient")
+    connectionPromise = Promise()
     synchronized {
       Some(
         new GoogleApiClient.Builder(this)
@@ -66,20 +62,26 @@ class MainActivity extends Activity with Contexts[Activity] with ConnectionCallb
           .addApi(LocationServices.API)
           .build()) } }
 
-  override def onConnected(connectionHint: Bundle): Unit = {
-    Log.i("whereat", "API connected")
-    Log.i("whereat", s"${apiClient.get}")
-    val loc = LocationServices.FusedLocationApi.getLastLocation(apiClient.get)
-    Log.i("whereat", s"Location: $loc")
-    if (loc != null) locText.success { s"Lat: ${loc.getLatitude}, Lon: ${loc.getLongitude}"}
-    else locText.success { "No location detected!" } }
+  override def onConnected(connectionHint: Bundle): Unit =
+    connectionPromise.trySuccess(())
 
   override def onConnectionFailed(res: ConnectionResult): Unit = {
+    connectionPromise = Promise()
     Log.i("whereat", "Connection failed: ConnectionResult.getErrorCode() = " + res.getErrorCode) }
 
   override def onConnectionSuspended(cause: Int) {
+    connectionPromise = Promise()
     Log.i("whereat", "Connection suspended")
-    apiClient.get.connect() }
+    apiClient foreach { _.connect } }
+
+  private def getLocation: Future[Option[Location]] =
+    connectionPromise.future map { _ ⇒
+      apiClient flatMap { cl ⇒
+        Option(LocationServices.FusedLocationApi.getLastLocation(cl)) } }
+
+  private def parseLocation(l: Option[Location]): String = l match {
+    case Some(ll) ⇒ s"Lat: ${ll.getLatitude}, Lon: ${ll.getLongitude}"
+    case None ⇒ "Location not available" }
 
 }
 
