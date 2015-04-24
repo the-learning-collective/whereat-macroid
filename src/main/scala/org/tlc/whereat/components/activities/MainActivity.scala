@@ -49,14 +49,16 @@ class MainActivity extends Activity with Contexts[Activity] with ConnectionCallb
         ) <~ MainTweaks.orient } } }
 
   override protected def onStart(): Unit = {
+    super.onStart()
     apiClient.get.connect() }
 
   override protected def onStop(): Unit = {
     super.onStop()
     if (apiClient.get.isConnected) apiClient.get.disconnect() }
 
-  def buildClient: Option[GoogleApiClient] = {
-    this.synchronized {
+  protected def buildClient: Option[GoogleApiClient] = {
+    Log.i("whereat", "running buildClient")
+    synchronized {
       Some(
         new GoogleApiClient.Builder(this)
           .addConnectionCallbacks(this)
@@ -65,9 +67,12 @@ class MainActivity extends Activity with Contexts[Activity] with ConnectionCallb
           .build()) } }
 
   override def onConnected(connectionHint: Bundle): Unit = {
+    Log.i("whereat", "API connected")
+    Log.i("whereat", s"${apiClient.get}")
     val loc = LocationServices.FusedLocationApi.getLastLocation(apiClient.get)
-    if (loc != null) locText.success{ s"Lat: ${loc.getLatitude}, Lon: ${loc.getLongitude}" }
-    else toast("No location detected!") <~long <~fry }
+    Log.i("whereat", s"Location: $loc")
+    if (loc != null) locText.success { s"Lat: ${loc.getLatitude}, Lon: ${loc.getLongitude}"}
+    else locText.success { "No location detected!" } }
 
   override def onConnectionFailed(res: ConnectionResult): Unit = {
     Log.i("whereat", "Connection failed: ConnectionResult.getErrorCode() = " + res.getErrorCode) }
