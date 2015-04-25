@@ -32,6 +32,9 @@ libraryDependencies ++= Seq(
   aar("org.macroid" %% "macroid" % "2.0.0-M4"),
   aar("org.macroid" %% "macroid-viewable" % "2.0.0-M4"),
   aar("com.android.support" % "support-v4" % "21.0.3"),
+  "com.google.android.gms" % "play-services" % "6.5.87",
+  "io.taig" %% "communicator" % "2.0.1",
+  "com.typesafe.play" %% "play-json" % "2.3.4",
   compilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
 )
 
@@ -41,7 +44,3 @@ proguardOptions in Android ++= Seq(
   "-ignorewarnings",
   "-keep class scala.Dynamic"
 )
-
-// Play Services
-
-libraryDependencies ++= Seq("com.google.android.gms" % "play-services" % "6.5.87")

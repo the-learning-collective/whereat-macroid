@@ -9,12 +9,15 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.GoogleApiClient.{ConnectionCallbacks, OnConnectionFailedListener}
 import com.google.android.gms.location.LocationServices
-import macroid.Contexts
+import macroid.{AppContext, Contexts}
 import macroid.FullDsl._
+import org.tlc.whereat.model.{Conversions, Loc}
+import org.tlc.whereat.msg.IntersectionResponse
+import org.tlc.whereat.services.IntersectionService
 import org.tlc.whereat.ui.tweaks.MainTweaks
 
-import scala.concurrent.{Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, Promise}
 
 /**
  * Author: @aguestuser
@@ -23,11 +26,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 
 
-class MainActivity extends Activity with Contexts[Activity] with ConnectionCallbacks with OnConnectionFailedListener { // include implicit contexts
+class MainActivity extends Activity
+  with Contexts[Activity]
+  with ConnectionCallbacks
+  with OnConnectionFailedListener
+  with Conversions {
 
+  implicit lazy val appContextProvider: AppContext = activityAppContext
   var apiClient: Option[GoogleApiClient] = None
   var locView: Option[TextView] = slot[TextView]
   var connectionPromise = Promise[Unit]()
+
+  // Activy UI & life cycle methods
 
   override protected def onCreate(savedInstanceState: Bundle): Unit = {
     super .onCreate(savedInstanceState)
@@ -39,7 +49,7 @@ class MainActivity extends Activity with Contexts[Activity] with ConnectionCallb
         l[LinearLayout](
           w[Button] <~
             text("Get Location") <~
-            On.click { locView <~ getLocation.map { l ⇒ text(parseLocation(l)) + show } },
+            On.click { locView <~ getIntersection.map { i ⇒ text(i) + show } },
           w[TextView] <~
             wire(locView) <~ hide
         ) <~ MainTweaks.orient } } }
@@ -51,6 +61,8 @@ class MainActivity extends Activity with Contexts[Activity] with ConnectionCallb
   override protected def onStop(): Unit = {
     super.onStop()
     apiClient foreach { cl ⇒ if(cl.isConnected) cl.disconnect() } }
+
+  // Location API Client builder & callbacks
 
   protected def buildClient: Option[GoogleApiClient] = {
     connectionPromise = Promise()
@@ -74,13 +86,23 @@ class MainActivity extends Activity with Contexts[Activity] with ConnectionCallb
     Log.i("whereat", "Connection suspended")
     apiClient foreach { _.connect } }
 
+  // Location & Geocoder API calls
+
+  def getIntersection: Future[String] =
+    getLocation flatMap {
+      case Some(l) ⇒ geocodeLocation(toLoc(l)) map parseGeocoding
+      case None ⇒ Future.successful ("Location not available") }
+
   private def getLocation: Future[Option[Location]] =
     connectionPromise.future map { _ ⇒
       apiClient flatMap { cl ⇒
         Option(LocationServices.FusedLocationApi.getLastLocation(cl)) } }
 
-  private def parseLocation(l: Option[Location]): String = l match {
-    case Some(ll) ⇒ s"Lat: ${ll.getLatitude}, Lon: ${ll.getLongitude}"
+  def geocodeLocation(l: Loc): Future[IntersectionResponse] =
+    IntersectionService.getIntersection(toIntersectionRequest(l)) //TODO do i need to pass an AppContext here?
+
+  def parseGeocoding(res: IntersectionResponse): String = res.maybe match {
+    case Some(i) ⇒ i.toString
     case None ⇒ "Location not available" }
 
 }
