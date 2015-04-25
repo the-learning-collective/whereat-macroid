@@ -1,4 +1,4 @@
-package org.tlc.whereat.components.activities
+package org.tlc.whereat.activities
 
 import android.app.Activity
 import android.location.Location
