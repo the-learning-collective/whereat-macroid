@@ -18,7 +18,7 @@
 
         <activity
           android:label="WhereⒶt"
-          android:name="org.tlc.whereat.components.activities.MainActivity">
+          android:name="org.tlc.whereat.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

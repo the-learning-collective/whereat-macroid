@@ -15,7 +15,8 @@ run <<= run in Android
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
-  "jcenter" at "http://jcenter.bintray.com"
+  "jcenter" at "http://jcenter.bintray.com",
+  "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 )
 
 scalacOptions in (Compile, compile) ++=
@@ -25,8 +26,12 @@ scalacOptions in (Compile, compile) ++= Seq(
   "-P:wartremover:traverser:macroid.warts.CheckUi"
 )
 
-javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
+
 scalacOptions ++= Seq("-feature", "-deprecation", "-target:jvm-1.7")
+
+scalacOptions in Test ++= Seq("-Yrangepos")
+
+javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 libraryDependencies ++= Seq(
   aar("org.macroid" %% "macroid" % "2.0.0-M4"),
@@ -35,6 +40,7 @@ libraryDependencies ++= Seq(
   "com.google.android.gms" % "play-services" % "6.5.87",
   "io.taig" %% "communicator" % "2.0.1",
   "com.typesafe.play" %% "play-json" % "2.3.4",
+  "org.specs2" %% "specs2-core" % "3.5" % "test",
   compilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
 )
 
@@ -43,4 +49,11 @@ proguardScala in Android := true
 proguardOptions in Android ++= Seq(
   "-ignorewarnings",
   "-keep class scala.Dynamic"
+)
+
+apkbuildExcludes in Android ++= Seq (
+  "META-INF/LICENSE",
+  "META-INF/LICENSE.txt",
+  "META-INF/NOTICE",
+  "META-INF/NOTICE.txt"
 )

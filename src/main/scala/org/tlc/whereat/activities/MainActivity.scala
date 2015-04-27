@@ -36,6 +36,7 @@ class MainActivity extends Activity
   var apiClient: Option[GoogleApiClient] = None
   var locView: Option[TextView] = slot[TextView]
   var connectionPromise = Promise[Unit]()
+  val TAG = "whereat"
 
   // Activy UI & life cycle methods
 
@@ -79,18 +80,20 @@ class MainActivity extends Activity
 
   override def onConnectionFailed(res: ConnectionResult): Unit = {
     connectionPromise = Promise()
-    Log.i("whereat", "Connection failed: ConnectionResult.getErrorCode() = " + res.getErrorCode) }
+    Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + res.getErrorCode) }
 
   override def onConnectionSuspended(cause: Int) {
     connectionPromise = Promise()
-    Log.i("whereat", "Connection suspended")
+    Log.i(TAG, "Connection suspended")
     apiClient foreach { _.connect } }
 
   // Location & Geocoder API calls
 
   def getIntersection: Future[String] =
     getLocation flatMap {
-      case Some(l) ⇒ geocodeLocation(toLoc(l)) map parseGeocoding
+      case Some(l) ⇒
+        Log.i(TAG, s"Location retrieved: $l")
+        geocodeLocation(toLoc(l)) map parseGeocoding
       case None ⇒ Future.successful ("Location not available") }
 
   private def getLocation: Future[Option[Location]] =

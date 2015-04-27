@@ -9,41 +9,44 @@ import play.api.libs.json.Json
  */
 
 case class ApiIntersection(
-                            lat: Double,
-                            lng: Double,
-                            distance: Double,
+                            lat: String,
+                            lng: String,
+                            distance: String,
                             street1: String,
                             street2: String,
-                            street1Bearing: Int,
+                            street1Bearing: String,
                             street2Bearing: String,
                             placename: String,
-                            adminCode1: String,
                             adminName1: String,
                             adminName2: String,
-                            postalcode: Int,
+                            adminCode1: String,
+                            postalcode: String,
                             countryCode: String,
                             mtfcc1: String,
                             mtfcc2: String
-                          )
+                            )
 
 trait ApiIntersectionFormatJson {
-//  implicit val formatApiIntersection: Format[ApiIntersection] =
-//    ((JsPath \ "lat").format[Double] and
-//      (JsPath \ "lng").format[Double] and
-//      (JsPath \ "distance").format[Double] and
-//      (JsPath \ "street1").format[String] and
-//      (JsPath \ "street2").format[String] and
-//      (JsPath \ "street1Bearing").format[Int] and
-//      (JsPath \ "street2Bearing").format[String] and
-//      (JsPath \ "placename").format[String] and
-//      (JsPath \ "adminCode1").format[String] and
-//      (JsPath \ "adminName1").format[String] and
-//      (JsPath \ "adminName2").format[String] and
-//      (JsPath \ "postalcode").format[Int] and
-//      (JsPath \ "countryCode").format[String] and
-//      (JsPath \ "mtfcc1").format[String] and
-//      (JsPath \ "mtfcc2").format[String]
-//    )(ApiIntersection.apply, unlift(ApiIntersection.unapply))
 
-  implicit val formatApiIntersection = Json.format[ApiIntersection]
+//  implicit val formatApiIntersection: Format[ApiIntersection] = (
+//  (JsPath \ "lat").format[String] and
+//    (JsPath \ "lng").format[String] and
+//    (JsPath \ "distance").format[String] and
+//    (JsPath \ "street1").format[String] and
+//    (JsPath \ "street2").format[String] and
+//    (JsPath \ "street1Bearing").format[String] and
+//    (JsPath \ "street2Bearing").format[String] and
+//    (JsPath \ "placename").format[String] and
+//    (JsPath \ "adminName1").format[String] and
+//    (JsPath \ "adminName2").format[String] and
+//    (JsPath \ "adminCode1").format[String] and
+//    (JsPath \ "postalcode").format[String] and
+//    (JsPath \ "countryCode").format[String] and
+//    (JsPath \ "mtfcc1").format[String] and
+//    (JsPath \ "mtfcc2").format[String]
+//  )(ApiIntersection.apply, unlift(ApiIntersection.unapply))
+
+  implicit val fmtApiIntersection = Json.format[ApiIntersection]
 }
+
+object ApiIntersectionFormatJson extends ApiIntersectionFormatJson

@@ -2,6 +2,7 @@ package org.tlc.whereat.services
 
 import java.io.InputStream
 
+import android.util.Log
 import io.taig.communicator.internal.response.Plain
 import io.taig.communicator.internal.result.Parser
 import macroid.AppContext
@@ -20,7 +21,8 @@ import scala.concurrent.Future
 
 object IntersectionApiJsonParser extends Parser[ApiIntersection] with ApiIntersectionFormatJson {
   override def parse(res: Plain, stream: InputStream): ApiIntersection =
-    Json.parse(scala.io.Source.fromInputStream(stream).mkString).as[ApiIntersection]
+    (Json.parse(scala.io.Source.fromInputStream(stream).mkString) \ "intersection")
+      .as[ApiIntersection]
 }
 
 trait IntersectionService extends Net with Conversions {
@@ -30,6 +32,7 @@ trait IntersectionService extends Net with Conversions {
     import scala.concurrent.ExecutionContext.Implicits.global
     implicit val parser = IntersectionApiJsonParser
     val url = "http://api.geonames.org/findNearestIntersectionJSON"
+    Log.i("WHERAT", "running getIntersection")
 
     reqJson[ApiIntersection](IntersectionRequest.urlWithQuery(url,req))
       .transform(
