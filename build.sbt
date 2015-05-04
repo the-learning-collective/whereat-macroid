@@ -15,6 +15,8 @@ run <<= run in Android
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
+  Resolver.mavenLocal,
+  "47deg Public" at "http://clinker.47deg.com/nexus/content/groups/public",
   "jcenter" at "http://jcenter.bintray.com",
   "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 )
@@ -37,10 +39,13 @@ libraryDependencies ++= Seq(
   aar("org.macroid" %% "macroid" % "2.0.0-M4"),
   aar("org.macroid" %% "macroid-viewable" % "2.0.0-M4"),
   aar("com.android.support" % "support-v4" % "21.0.3"),
+  aar("com.fortysevendeg" %% "macroid-extras" % "0.1-SNAPSHOT"),
   "com.google.android.gms" % "play-services" % "6.5.87",
   "io.taig" %% "communicator" % "2.0.1",
   "com.typesafe.play" %% "play-json" % "2.3.4",
-  "org.specs2" %% "specs2-core" % "3.5" % "test",
+  "org.specs2" % "specs2-core_2.11" % "3.6-scalaz-7.0.7" % "test",
+  "org.specs2" % "specs2-mock_2.11" % "3.6-scalaz-7.0.7" % "test",
+  "org.specs2" % "specs2-junit_2.11" % "3.6-scalaz-7.0.7" % "test",
   compilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
 )
 

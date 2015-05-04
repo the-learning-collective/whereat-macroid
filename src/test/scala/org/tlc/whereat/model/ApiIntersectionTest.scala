@@ -8,7 +8,7 @@ import play.api.libs.json.Json
  * License: GPLv2 (https://www.gnu.org/licenses/gpl-2.0.html)
  */
 
-class ApiIntersection$Test extends org.specs2.mutable.Specification with ApiIntersectionFormatJson {
+class ApiIntersectionTest extends org.specs2.mutable.Specification with ApiIntersectionFormatJson {
 
   lazy val apiIntersection = ApiIntersection(
     "40.72084", //lat

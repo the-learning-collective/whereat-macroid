@@ -10,7 +10,7 @@ case class IntersectionRequest(lat: Double, lng: Double)
 
 object IntersectionRequest {
   def urlWithQuery(url: String, req: IntersectionRequest): String =
-    s"$url?lat=${req.lat}&lng=${req.lng}"
+    s"$url?lat=${req.lat}&lng=${req.lng}&username=aguestuser"
 }
 
 

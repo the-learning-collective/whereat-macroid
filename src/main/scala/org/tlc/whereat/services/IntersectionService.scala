@@ -34,10 +34,9 @@ trait IntersectionService extends Net with Conversions {
     val url = "http://api.geonames.org/findNearestIntersectionJSON"
     Log.i("WHERAT", "running getIntersection")
 
-    reqJson[ApiIntersection](IntersectionRequest.urlWithQuery(url,req))
-      .transform(
-        res ⇒ IntersectionResponse(Some(toIntersection(res))),
-        throwable ⇒ throwable ) }
+    reqJson[ApiIntersection](IntersectionRequest.urlWithQuery(url,req)).transform(
+      res ⇒ IntersectionResponse(Some(toIntersection(res))),
+      throwable ⇒ throwable ) }
 
 
 }
