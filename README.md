@@ -9,6 +9,6 @@ __In its mature form, WhereⒶt will:__
 
 * use graph diffusion to transmit SMS messages through a social network without a central server (and the costs and security risks that entails)
 * combine location-sharing notifications and a reactive map to allow protesters to maintain situational awareness of a march with multiple contingents spread throughout a city
-* delete all logs within 24 hours and provide encrypted channels of communications to protect communications from state surveillance
+* delete all records within 24 hours and provide encrypted channels of communications to protect communications from state surveillance
 
 Built using [Macroid](https://github.com/macroid/macroid) with guidance from the good folks at [47 Degrees](http://www.47deg.com/)
