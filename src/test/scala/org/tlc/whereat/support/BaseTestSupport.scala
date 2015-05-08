@@ -1,6 +1,6 @@
 package org.tlc.whereat.support
 
-import org.specs2.execute.{Result, AsResult}
+import org.specs2.execute.{AsResult, Result}
 import org.specs2.specification.{Scope, Around}
 
 /**
