@@ -46,6 +46,8 @@ libraryDependencies ++= Seq(
   "org.specs2" % "specs2-core_2.11" % "3.6-scalaz-7.0.7" % "test",
   "org.specs2" % "specs2-mock_2.11" % "3.6-scalaz-7.0.7" % "test",
   "org.specs2" % "specs2-junit_2.11" % "3.6-scalaz-7.0.7" % "test",
+//  "org.specs2" %% "specs2-core" % "2.4.17" % "test",
+//  "org.specs2" % "specs2-mock_2.11" % "3.0-M2" % "test",
   compilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
 )
 
