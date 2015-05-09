@@ -17,6 +17,7 @@ trait AppContextTestSupport
   with TestConfig
   with Scope {
 
+
   implicit val appContextProvider: AppContext = mock[AppContext]
 
   appContextProvider.get returns mockContext

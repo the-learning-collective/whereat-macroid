@@ -3,7 +3,7 @@ package org.tlc.whereat.services
 import com.squareup.okhttp.OkHttpClient
 import io.taig.communicator.internal.result.Parser
 import org.specs2.mutable.Specification
-import org.tlc.whereat.model.{Intersection, ApiIntersection, Loc}
+import org.tlc.whereat.model.{ApiIntersection, Intersection, Loc}
 import org.tlc.whereat.msg.IntersectionResponse
 import org.tlc.whereat.support.{AppContextTestSupport, BaseTestSupport}
 
@@ -55,16 +55,12 @@ class IntersectionServiceSpec
 
     "parse intersection from JSON" in new IntersectionServiceMock {
 
-      true === true
       override def reqJson[T](url: String)(implicit parser: Parser[T], client: OkHttpClient = new OkHttpClient()): Future[T] =
         Future.successful[T](validIntersection.asInstanceOf[T])
 
       Await.result(getIntersection(rcLocReq), Duration.Inf) shouldEqual
 //      IntersectionService.getIntersection(rcLocReq) *===
         IntersectionResponse(Some(Intersection(street1 = "Broadway", street2 = "Grand St")))
-
     }
-
   }
-
 }
