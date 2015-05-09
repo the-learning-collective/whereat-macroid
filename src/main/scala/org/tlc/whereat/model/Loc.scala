@@ -1,5 +1,7 @@
 package org.tlc.whereat.model
 
+import org.tlc.whereat.msg.IntersectionRequest
+
 /**
  * Author: @aguestuser
  * Date: 4/24/15
@@ -9,5 +11,4 @@ package org.tlc.whereat.model
 case class Loc(lat: Double, lng: Double)
 
 object Loc {
-
 }

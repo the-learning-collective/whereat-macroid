@@ -32,11 +32,22 @@ trait IntersectionService extends Net with Conversions {
     import scala.concurrent.ExecutionContext.Implicits.global
     implicit val parser = IntersectionApiJsonParser
     val url = "http://api.geonames.org/findNearestIntersectionJSON"
-    Log.i("WHERAT", "running getIntersection")
+    log(Log.INFO, "WHERAT", "running getIntersection")
 
     reqJson[ApiIntersection](IntersectionRequest.urlWithQuery(url,req)).transform(
       res ⇒ IntersectionResponse(Some(toIntersection(res))),
       throwable ⇒ throwable ) }
+
+  def log(level: Int, tag: String, message: String): Int = {
+    level match {
+      case Log.VERBOSE => Log.v(tag, message)
+      case Log.DEBUG => Log.d(tag, message)
+      case Log.INFO => Log.i(tag, message)
+      case Log.WARN => Log.w(tag, message)
+      case Log.ERROR => Log.e(tag, message)
+      case Log.ASSERT => Log.wtf(tag, message)
+    }
+  }
 
 
 }
