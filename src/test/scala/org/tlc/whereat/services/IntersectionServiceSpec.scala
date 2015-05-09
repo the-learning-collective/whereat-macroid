@@ -3,7 +3,7 @@ package org.tlc.whereat.services
 import com.squareup.okhttp.OkHttpClient
 import io.taig.communicator.internal.result.Parser
 import org.specs2.mutable.Specification
-import org.tlc.whereat.model.{Intersection, ApiIntersection, Loc}
+import org.tlc.whereat.model.{ApiIntersection, Intersection, Loc}
 import org.tlc.whereat.msg.IntersectionResponse
 import org.tlc.whereat.support.{AppContextTestSupport, BaseTestSupport}
 
@@ -28,7 +28,7 @@ trait IntersectionServiceMock
     lng = "-74.000661",
     distance = "0.03",
     street1 = "Broadway",
-    street2 = "Grand St ",
+    street2 = "Grand St",
     street1Bearing = "32",
     street2Bearing = "124",
     placename = "New York",
@@ -40,26 +40,27 @@ trait IntersectionServiceMock
     mtfcc1 = "S1400",
     mtfcc2 = "S1400"
   )
+
+  override def log(level: Int, tag: String, message: String): Int = {
+    println(s"$tag: $message")
+    0
+  }
 }
 
-class IntersectionServiceTest
+class IntersectionServiceSpec
   extends Specification
   with BaseTestSupport {
 
   "Intersection Service" should {
 
-    "parse intersection from JSON" >> new IntersectionServiceMock {
+    "parse intersection from JSON" in new IntersectionServiceMock {
 
-      true === true
       override def reqJson[T](url: String)(implicit parser: Parser[T], client: OkHttpClient = new OkHttpClient()): Future[T] =
         Future.successful[T](validIntersection.asInstanceOf[T])
 
-      Await.result(IntersectionService.getIntersection(rcLocReq), Duration.Inf) shouldEqual
+      Await.result(getIntersection(rcLocReq), Duration.Inf) shouldEqual
 //      IntersectionService.getIntersection(rcLocReq) *===
-        IntersectionResponse(Some(Intersection(street1 = "Grand St", street2 = "Broadway")))
-
+        IntersectionResponse(Some(Intersection(street1 = "Broadway", street2 = "Grand St")))
     }
-
   }
-
 }
