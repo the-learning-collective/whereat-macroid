@@ -5,10 +5,10 @@ import io.taig.communicator.internal.result.Parser
 import org.specs2.mutable.Specification
 import org.tlc.whereat.model.{ApiIntersection, Intersection, Loc}
 import org.tlc.whereat.msg.IntersectionResponse
+import org.tlc.whereat.support.AsyncUtils._
 import org.tlc.whereat.support.{AppContextTestSupport, BaseTestSupport}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 /**
  * Author: @aguestuser
@@ -38,28 +38,26 @@ trait IntersectionServiceMock
     postalcode = "10013",
     countryCode = "US",
     mtfcc1 = "S1400",
-    mtfcc2 = "S1400"
-  )
+    mtfcc2 = "S1400" )
 
   override def log(level: Int, tag: String, message: String): Int = {
-    println(s"$tag: $message")
-    0
-  }
+    println(s"$tag: $message"); 0 }
 }
 
 class IntersectionServiceSpec
   extends Specification
   with BaseTestSupport {
 
+
+
   "Intersection Service" should {
 
-    "parse intersection from JSON" in new IntersectionServiceMock {
+    "parse intersection from JSON" >> new IntersectionServiceMock {
 
       override def reqJson[T](url: String)(implicit parser: Parser[T], client: OkHttpClient = new OkHttpClient()): Future[T] =
         Future.successful[T](validIntersection.asInstanceOf[T])
 
-      Await.result(getIntersection(rcLocReq), Duration.Inf) shouldEqual
-//      IntersectionService.getIntersection(rcLocReq) *===
+      getIntersection(rcLocReq) *===
         IntersectionResponse(Some(Intersection(street1 = "Broadway", street2 = "Grand St")))
     }
   }

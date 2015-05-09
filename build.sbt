@@ -1,5 +1,5 @@
 import android.Dependencies.aar
-import android.Keys._
+import android.Keys.{platformTarget, Android, proguardScala, useProguard, proguardOptions, apkbuildExcludes}
 
 //MACROID STUFF//
 
