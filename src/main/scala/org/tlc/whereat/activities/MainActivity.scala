@@ -7,6 +7,7 @@ import android.widget.{Button, LinearLayout, TextView}
 import macroid.FullDsl._
 import macroid.{AppContext, Contexts}
 import org.tlc.whereat.model.Conversions
+import org.tlc.whereat.msg.Logger
 import org.tlc.whereat.services.{GoogleApiService, IntersectionService}
 import org.tlc.whereat.ui.tweaks.MainTweaks
 
@@ -22,9 +23,10 @@ import scala.concurrent.Future
 
 class MainActivity extends Activity
   with Contexts[Activity]
-  with Conversions
   with GoogleApiService
-  with IntersectionService {
+  with IntersectionService
+  with Conversions
+  with Logger {
 
   implicit lazy val appContextProvider: AppContext = activityAppContext
   var locView: Option[TextView] = slot[TextView]
@@ -59,7 +61,7 @@ class MainActivity extends Activity
   def getIntersection: Future[String] =
     getLocation flatMap {
       case Some(l) ⇒
-        Log.i("WHEREAT", s"Location retrieved: $l")
+        log(Log.INFO, s"Location retrieved: $l")
         geocodeLocation(toLoc(l)) map parseGeocoding
       case None ⇒ Future.successful ("Location not available") }
 

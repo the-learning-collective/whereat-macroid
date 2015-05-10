@@ -7,7 +7,7 @@ import io.taig.communicator.internal.response.Plain
 import io.taig.communicator.internal.result.Parser
 import macroid.AppContext
 import org.tlc.whereat.model.{Loc, Conversions, ApiIntersectionFormatJson, ApiIntersection}
-import org.tlc.whereat.msg.{IntersectionResponse, IntersectionRequest}
+import org.tlc.whereat.msg.{Logger, IntersectionResponse, IntersectionRequest}
 import org.tlc.whereat.net.NetUtil
 import play.api.libs.json.Json
 
@@ -25,37 +25,28 @@ object IntersectionApiJsonParser extends Parser[ApiIntersection] with ApiInterse
       .as[ApiIntersection]
 }
 
-trait IntersectionService extends NetUtil with Conversions {
+trait IntersectionService
+  extends NetUtil
+  with Logger
+  with Conversions {
 
   def geocodeLocation(l: Loc)(implicit appContextProvider: AppContext): Future[IntersectionResponse] =
-    requestIntersection(toIntersectionRequest(l))
+    requestGeocode(toIntersectionRequest(l))
 
   def parseGeocoding(res: IntersectionResponse): String = res.maybe match {
     case Some(i) ⇒ i.toString
     case None ⇒ "Location not available" }
 
-  def requestIntersection(req: IntersectionRequest)(implicit appContextProvider: AppContext): Future[IntersectionResponse] = {
+  def requestGeocode(req: IntersectionRequest)(implicit appContextProvider: AppContext): Future[IntersectionResponse] = {
 
     import scala.concurrent.ExecutionContext.Implicits.global
     implicit val parser = IntersectionApiJsonParser
     val url = "http://api.geonames.org/findNearestIntersectionJSON"
-    log(Log.INFO, "WHEREAT", "running getIntersection")
+    log(Log.INFO, "running getIntersection")
 
     reqJson[ApiIntersection](IntersectionRequest.urlWithQuery(url,req)).transform(
       res ⇒ IntersectionResponse(Some(toIntersection(res))),
       throwable ⇒ throwable ) }
-
-  def log(level: Int, tag: String, message: String): Int = {
-    level match {
-      case Log.VERBOSE => Log.v(tag, message)
-      case Log.DEBUG => Log.d(tag, message)
-      case Log.INFO => Log.i(tag, message)
-      case Log.WARN => Log.w(tag, message)
-      case Log.ERROR => Log.e(tag, message)
-      case Log.ASSERT => Log.wtf(tag, message)
-    }
-  }
-
 
 }
 
