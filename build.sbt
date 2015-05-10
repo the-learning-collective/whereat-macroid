@@ -1,5 +1,14 @@
 import android.Dependencies.aar
-import android.Keys.{platformTarget, Android, proguardScala, useProguard, proguardOptions, apkbuildExcludes}
+import android.Keys.{
+  platformTarget,
+  Android,
+  proguardScala,
+  useProguard,
+  proguardOptions,
+  apkbuildExcludes,
+  dexMaxHeap,
+  proguardCache,
+  ProguardCache}
 
 //MACROID STUFF//
 
@@ -41,6 +50,8 @@ proguardOptions in Android ++= Seq(
   "-ignorewarnings",
   "-keep class scala.Dynamic")
 
+dexMaxHeap in Android := "2048m"
+
 libraryDependencies ++= Seq(
   aar("org.macroid" %% "macroid" % "2.0.0-M4"),
   aar("org.macroid" %% "macroid-viewable" % "2.0.0-M4"),
@@ -49,13 +60,23 @@ libraryDependencies ++= Seq(
   "com.google.android.gms" % "play-services" % "6.5.87",
   "io.taig" %% "communicator" % "2.0.1",
   "com.typesafe.play" %% "play-json" % "2.3.4",
-//  "org.specs2" %% "specs2-core" % "3.6-scalaz-7.0.7" % "test",
-//  "org.specs2" %% "specs2-mock" % "3.6-scalaz-7.0.7" % "test",
-//  "org.specs2" %% "specs2-junit" % "3.6-scalaz-7.0.7" % "test",
   "org.specs2" %% "specs2-core" % "2.4.15" % "test",
   "org.specs2" %% "specs2-mock" % "3.0-M2" % "test",
   "com.google.android" % "android" % "4.1.1.4" % "test",
   compilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
+  //  "org.specs2" %% "specs2-core" % "3.6-scalaz-7.0.7" % "test",
+  //  "org.specs2" %% "specs2-mock" % "3.6-scalaz-7.0.7" % "test",
+  //  "org.specs2" %% "specs2-junit" % "3.6-scalaz-7.0.7" % "test",
+)
+
+proguardCache in Android ++= Seq(
+  ProguardCache("org.macroid") %% "macroid" % "2.0.0-M4",
+  ProguardCache("org.macroid") %% "macroid-viewable" % "2.0.0-M4",
+  ProguardCache("com.android.support") % "support-v4" % "22.1.1",
+  ProguardCache("com.fortysevendeg") %% "macroid-extras" % "0.1-SNAPSHOT",
+  ProguardCache("com.google.android.gms") % "play-services" % "6.5.87",
+  ProguardCache("io.taig") %% "communicator" % "2.0.1",
+  ProguardCache("com.typesafe.play") %% "play-json" % "2.3.4"
 )
 
 apkbuildExcludes in Android ++= Seq (
