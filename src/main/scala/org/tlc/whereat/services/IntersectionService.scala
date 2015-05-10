@@ -6,9 +6,9 @@ import android.util.Log
 import io.taig.communicator.internal.response.Plain
 import io.taig.communicator.internal.result.Parser
 import macroid.AppContext
-import org.tlc.whereat.model.{Conversions, ApiIntersectionFormatJson, ApiIntersection}
+import org.tlc.whereat.model.{Loc, Conversions, ApiIntersectionFormatJson, ApiIntersection}
 import org.tlc.whereat.msg.{IntersectionResponse, IntersectionRequest}
-import org.tlc.whereat.net.Net
+import org.tlc.whereat.net.NetUtil
 import play.api.libs.json.Json
 
 import scala.concurrent.Future
@@ -25,14 +25,21 @@ object IntersectionApiJsonParser extends Parser[ApiIntersection] with ApiInterse
       .as[ApiIntersection]
 }
 
-trait IntersectionService extends Net with Conversions {
+trait IntersectionService extends NetUtil with Conversions {
 
-  def getIntersection(req: IntersectionRequest)(implicit appContextProvider: AppContext): Future[IntersectionResponse] = {
+  def geocodeLocation(l: Loc)(implicit appContextProvider: AppContext): Future[IntersectionResponse] =
+    requestIntersection(toIntersectionRequest(l))
+
+  def parseGeocoding(res: IntersectionResponse): String = res.maybe match {
+    case Some(i) ⇒ i.toString
+    case None ⇒ "Location not available" }
+
+  def requestIntersection(req: IntersectionRequest)(implicit appContextProvider: AppContext): Future[IntersectionResponse] = {
 
     import scala.concurrent.ExecutionContext.Implicits.global
     implicit val parser = IntersectionApiJsonParser
     val url = "http://api.geonames.org/findNearestIntersectionJSON"
-    log(Log.INFO, "WHERAT", "running getIntersection")
+    log(Log.INFO, "WHEREAT", "running getIntersection")
 
     reqJson[ApiIntersection](IntersectionRequest.urlWithQuery(url,req)).transform(
       res ⇒ IntersectionResponse(Some(toIntersection(res))),

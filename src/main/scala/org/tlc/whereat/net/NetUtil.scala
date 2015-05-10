@@ -11,7 +11,7 @@ import scala.concurrent.Future
  * License: GPLv2 (https://www.gnu.org/licenses/gpl-2.0.html)
  */
 
-trait Net {
+trait NetUtil {
 
   def reqJson[T](url: String)(implicit parser: Parser[T], client: OkHttpClient = new OkHttpClient()): Future[T] = {
 
