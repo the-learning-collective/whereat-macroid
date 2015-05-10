@@ -34,8 +34,8 @@ resolvers ++= Seq(
   Resolver.defaultLocal,
   "47deg Public" at "http://clinker.47deg.com/nexus/content/groups/public",
   "jcenter" at "http://jcenter.bintray.com",
-  "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
-  "jbrechtel snapshots" at "http://jbrechtel.github.com/repo/snapshots"
+  "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+//  "jbrechtel snapshots" at "http://jbrechtel.github.com/repo/snapshots"
 )
 
 run <<= run in Android
@@ -64,7 +64,7 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2-core" % "2.4.15" % "test",
   "org.specs2" %% "specs2-mock" % "3.0-M2" % "test",
   "com.google.android" % "android" % "4.1.1.4" % "test",
-  "com.github.jbrechtel" % "robospecs_2.8.1" % "0.1-SNAPSHOT" % "test",
+//  "com.github.jbrechtel" % "robospecs_2.8.1" % "0.1-SNAPSHOT" % "test",
   compilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
   //  "org.specs2" %% "specs2-core" % "3.6-scalaz-7.0.7" % "test",
   //  "org.specs2" %% "specs2-mock" % "3.6-scalaz-7.0.7" % "test",
@@ -73,9 +73,9 @@ libraryDependencies ++= Seq(
 
 // Since Robospecs can't run in parallel...
 
-parallelExecution in Test := false
-
-testOptions in Test += Tests.Argument("sequential")
+//parallelExecution in Test := false
+//
+//testOptions in Test += Tests.Argument("sequential")
 
 proguardCache in Android ++= Seq(
   ProguardCache("org.macroid") %% "macroid" % "2.0.0-M4",
