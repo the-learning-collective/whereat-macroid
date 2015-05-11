@@ -48,7 +48,8 @@ useProguard in Android := true
 // Set proguard options
 proguardOptions in Android ++= Seq(
   "-ignorewarnings",
-  "-keep class scala.Dynamic")
+  "-keep class scala.Dynamic"
+)
 
 dexMaxHeap in Android := "2048m"
 

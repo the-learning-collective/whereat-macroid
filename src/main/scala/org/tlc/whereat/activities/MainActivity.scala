@@ -1,13 +1,13 @@
 package org.tlc.whereat.activities
 
 import android.app.Activity
-import android.content.Intent
+import android.content.{ComponentName, Intent}
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract.CommonDataKinds
-import android.util.Log
 import android.widget.{Button, LinearLayout, TextView}
 import macroid.FullDsl._
-import macroid.{AppContext, Contexts}
+import macroid.{Ui, AppContext, Contexts}
 import org.tlc.whereat.model.Conversions
 import org.tlc.whereat.msg.Logger
 import org.tlc.whereat.services.{GoogleApiService, IntersectionService}
@@ -31,7 +31,8 @@ class MainActivity extends Activity
   with Logger {
 
   implicit lazy val appContextProvider: AppContext = activityAppContext
-  var locView: Option[TextView] = slot[TextView]
+  var intersectionView: Option[TextView] = slot[TextView]
+  var sharePrompt = slot[Button]
 
   // Activy UI & life cycle methods
 
@@ -45,9 +46,17 @@ class MainActivity extends Activity
         l[LinearLayout](
           w[Button] <~
             text("Get Location") <~
-            On.click { locView <~ getIntersection.map { i ⇒ text(i) + show } },
+            On.click {
+              Ui.sequence(
+                intersectionView <~ getIntersection.map { i ⇒ text(i) + show },
+                sharePrompt <~ show
+              )
+            },
           w[TextView] <~
-            wire(locView) <~ hide
+            wire(intersectionView) <~ hide,
+          w[Button] <~
+            wire(sharePrompt) <~
+            text("Share Location") <~ hide
         ) <~ MainTweaks.orient } } }
 
   override protected def onStart(): Unit = {
@@ -62,14 +71,13 @@ class MainActivity extends Activity
 
   def getIntersection: Future[String] =
     getLocation flatMap {
-      case Some(l) ⇒
-        log(Log.INFO, "WHEREAT", s"Location retrieved: $l")
-        geocodeLocation(toLoc(l)) map parseGeocoding
-      case None ⇒ Future.successful ("Location not available") }
+      case None ⇒ Future.successful("Location not available") //Future.successful ("Location not available")
+      case Some(l) ⇒ geocodeLocation(toLoc(l)) map parseGeocoding }
 
   def shareIntersection(intersection: String): Future[Unit] =
-    getPhoneNumber flatMap { sendSms(intersection) }
-
+    getPhoneNumber flatMap { num ⇒
+      phoneNumberPromise = Promise()
+      sendSms(intersection)(num) }
 
   // contact intent passing
   // TODO extract this to a trait!
@@ -80,10 +88,10 @@ class MainActivity extends Activity
 
   def getPhoneNumber: Future[String] = {
     val intent = new Intent(Intent.ACTION_PICK).setType(CommonDataKinds.Phone.CONTENT_TYPE)
-    Option(intent.resolveActivity(getPackageManager)) foreach  { _ ⇒ startActivityForResult(intent, REQUEST_SELECT_PHONE_NUMBER) }
+    resolve(intent) foreach  { _ ⇒ startActivityForResult(intent, REQUEST_SELECT_PHONE_NUMBER) }
     phoneNumberPromise.future }
 
-  protected override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+  protected override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = {
     if (requestCode == REQUEST_SELECT_PHONE_NUMBER && resultCode == RESULT_OK) {
       val (uri, projection) = (data.getData, Array(CommonDataKinds.Phone.NUMBER))
       val cursor = getContentResolver.query(uri, projection, null, null, null)
@@ -95,10 +103,15 @@ class MainActivity extends Activity
   // TODO implement this and extract it to a trait!
 
   def sendSms(msg: String)(recipient: String): Future[Unit] = {
-    // hmm...
-    phoneNumberPromise = Promise()
+    val intent = new Intent(Intent.ACTION_SEND)
+      .setData(Uri.parse("smsto:"))
+      .putExtra("sms_body", msg)
+    resolve(intent) foreach { _ ⇒ startActivity(intent) }
     Future.successful{()}
   }
 
+
+  def resolve(intent: Intent): Option[ComponentName] =
+    Option(intent.resolveActivity(getPackageManager))
 }
 

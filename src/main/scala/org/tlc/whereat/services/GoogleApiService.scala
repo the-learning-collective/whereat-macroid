@@ -24,7 +24,7 @@ trait GoogleApiService
   import scala.concurrent.ExecutionContext.Implicits.global
 
   var gApiClient: Option[GoogleApiClient] = None
-  var connectionPromise = Promise[Unit]()
+  var connectionPromise: Promise[Unit] = Promise()
 
   protected def getLocation: Future[Option[Location]] =
     connectionPromise.future map { _ ⇒
