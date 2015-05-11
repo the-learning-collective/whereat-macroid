@@ -57,7 +57,7 @@ class IntersectionServiceSpec
       override def reqJson[T](url: String)(implicit parser: Parser[T], client: OkHttpClient = new OkHttpClient()): Future[T] =
         Future.successful[T](validIntersection.asInstanceOf[T])
 
-      getIntersection(rcLocReq) *===
+      requestGeocode(rcLocReq) *===
         IntersectionResponse(Some(Intersection(street1 = "Broadway", street2 = "Grand St")))
     }
   }

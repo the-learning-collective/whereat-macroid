@@ -2,6 +2,7 @@ package org.tlc.whereat.support
 
 import com.fortysevendeg.macroid.extras.AppContextProvider
 import macroid.AppContext
+import org.specs2.matcher.MustThrownExpectations
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 
@@ -15,8 +16,8 @@ trait AppContextTestSupport
   extends Mockito
   with AppContextProvider
   with TestConfig
-  with Scope {
-
+  with Scope
+  with MustThrownExpectations {
 
   implicit val appContextProvider: AppContext = mock[AppContext]
 

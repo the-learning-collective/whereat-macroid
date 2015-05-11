@@ -63,7 +63,7 @@ class MainActivity extends Activity
   def getIntersection: Future[String] =
     getLocation flatMap {
       case Some(l) ⇒
-        log(Log.INFO, s"Location retrieved: $l")
+        log(Log.INFO, "WHEREAT", s"Location retrieved: $l")
         geocodeLocation(toLoc(l)) map parseGeocoding
       case None ⇒ Future.successful ("Location not available") }
 

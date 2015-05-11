@@ -2,12 +2,11 @@ package org.tlc.whereat.services
 
 import java.io.InputStream
 
-import android.util.Log
 import io.taig.communicator.internal.response.Plain
 import io.taig.communicator.internal.result.Parser
 import macroid.AppContext
-import org.tlc.whereat.model.{Loc, Conversions, ApiIntersectionFormatJson, ApiIntersection}
-import org.tlc.whereat.msg.{Logger, IntersectionResponse, IntersectionRequest}
+import org.tlc.whereat.model.{ApiIntersection, ApiIntersectionFormatJson, Conversions, Loc}
+import org.tlc.whereat.msg.{IntersectionRequest, IntersectionResponse, Logger}
 import org.tlc.whereat.net.NetUtil
 import play.api.libs.json.Json
 
@@ -42,7 +41,6 @@ trait IntersectionService
     import scala.concurrent.ExecutionContext.Implicits.global
     implicit val parser = IntersectionApiJsonParser
     val url = "http://api.geonames.org/findNearestIntersectionJSON"
-    log(Log.INFO, "running getIntersection")
 
     reqJson[ApiIntersection](IntersectionRequest.urlWithQuery(url,req)).transform(
       res ⇒ IntersectionResponse(Some(toIntersection(res))),

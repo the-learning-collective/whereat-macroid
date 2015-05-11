@@ -10,8 +10,7 @@ import android.util.Log
 
 trait Logger {
 
-  protected def log(level: Int, message: String): Int = {
-    val tag = "WHEREAT"
+  protected def log(level: Int, tag: String, message: String): Int = {
     level match {
       case Log.VERBOSE => Log.v(tag, message)
       case Log.DEBUG => Log.d(tag, message)
