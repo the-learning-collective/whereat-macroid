@@ -1,7 +1,9 @@
 package org.tlc.whereat.activities
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract.CommonDataKinds
 import android.util.Log
 import android.widget.{Button, LinearLayout, TextView}
 import macroid.FullDsl._
@@ -12,7 +14,7 @@ import org.tlc.whereat.services.{GoogleApiService, IntersectionService}
 import org.tlc.whereat.ui.tweaks.MainTweaks
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 
 /**
  * Author: @aguestuser
@@ -56,7 +58,7 @@ class MainActivity extends Activity
     super.onStop()
     gApiClient foreach { cl ⇒ if(cl.isConnected) cl.disconnect() } }
 
-  // Location & Geocoder API calls
+  // location sharing
 
   def getIntersection: Future[String] =
     getLocation flatMap {
@@ -65,21 +67,38 @@ class MainActivity extends Activity
         geocodeLocation(toLoc(l)) map parseGeocoding
       case None ⇒ Future.successful ("Location not available") }
 
-  // contact picking
+  def shareIntersection(intersection: String): Future[Unit] =
+    getPhoneNumber flatMap { sendSms(intersection) }
 
-//  val REQUEST_SELECT_CONTACT = 1
 
-//  def selectContact(): Unit = {
-//    val intent = new Intent(Intent.ACTION_PICK)
-//    intent.setType(ContactsContract.Contacts.CONTENT_TYPE)
-//    if (intent.resolveActivity(getPackageManager) != null)
-//      startActivityForResult(intent, REQUEST_SELECT_CONTACT)
-//  }
-//
-//  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = {
-//    if (requestCode == REQUEST_SELECT_CONTACT && resultCode == 1)
-//      val contactUri = data.getData
-//  }
+  // contact intent passing
+  // TODO extract this to a trait!
+
+  var phoneNumberPromise: Promise[String] = Promise()
+  val REQUEST_SELECT_PHONE_NUMBER = 1
+  val RESULT_OK = -1
+
+  def getPhoneNumber: Future[String] = {
+    val intent = new Intent(Intent.ACTION_PICK).setType(CommonDataKinds.Phone.CONTENT_TYPE)
+    Option(intent.resolveActivity(getPackageManager)) foreach  { _ ⇒ startActivityForResult(intent, REQUEST_SELECT_PHONE_NUMBER) }
+    phoneNumberPromise.future }
+
+  protected override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    if (requestCode == REQUEST_SELECT_PHONE_NUMBER && resultCode == RESULT_OK) {
+      val (uri, projection) = (data.getData, Array(CommonDataKinds.Phone.NUMBER))
+      val cursor = getContentResolver.query(uri, projection, null, null, null)
+      if (cursor != null && cursor.moveToFirst()) {
+        val numberIndex = cursor.getColumnIndex(CommonDataKinds.Phone.NUMBER)
+        phoneNumberPromise.success { cursor.getString(numberIndex) } } } }
+
+  // sms intent passing
+  // TODO implement this and extract it to a trait!
+
+  def sendSms(msg: String)(recipient: String): Future[Unit] = {
+    // hmm...
+    phoneNumberPromise = Promise()
+    Future.successful{()}
+  }
 
 }
 
