@@ -2,12 +2,12 @@ package org.tlc.whereat.activities
 
 import android.app.Activity
 import android.content.{ComponentName, Intent}
-import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract.CommonDataKinds
+import android.telephony.SmsManager
 import android.widget.{Button, LinearLayout, TextView}
 import macroid.FullDsl._
-import macroid.{Ui, AppContext, Contexts}
+import macroid._
 import org.tlc.whereat.model.Conversions
 import org.tlc.whereat.msg.Logger
 import org.tlc.whereat.services.{GoogleApiService, IntersectionService}
@@ -31,8 +31,12 @@ class MainActivity extends Activity
   with Logger {
 
   implicit lazy val appContextProvider: AppContext = activityAppContext
-  var intersectionView: Option[TextView] = slot[TextView]
-  var sharePrompt = slot[Button]
+
+  var intersectionTextView = slot[TextView]
+  var getContactsButton = slot[Button]
+  var phoneNumberTextView = slot[TextView]
+  var shareLocationButton = slot[Button]
+  var successMessage = slot[TextView]
 
   // Activy UI & life cycle methods
 
@@ -47,17 +51,30 @@ class MainActivity extends Activity
           w[Button] <~
             text("Get Location") <~
             On.click {
-              Ui.sequence(
-                intersectionView <~ getIntersection.map { i ⇒ text(i) + show },
-                sharePrompt <~ show
-              )
+              (intersectionTextView <~~ getIntersection.map { fadeInText }) ~~
+              (getContactsButton <~~ fadeIn(100))
             },
           w[TextView] <~
-            wire(intersectionView) <~ hide,
+            wire(intersectionTextView) <~ hide,
           w[Button] <~
-            wire(sharePrompt) <~
-            text("Share Location") <~ hide
+            wire(getContactsButton) <~ hide <~ text("Get Contacts") <~
+            On.click { 
+              (phoneNumberTextView <~~ getPhoneNumber.map { fadeInText }) ~~
+              (shareLocationButton <~~ fadeIn(100))
+            },
+          w[TextView] <~
+            wire(phoneNumberTextView) <~ hide, 
+          w[Button] <~
+            wire(shareLocationButton) <~ hide <~ text("Share Location") <~
+            On.click {
+              successMessage <~~ sendSms.map(_ ⇒ show)
+            },
+          w[TextView] <~
+            wire(successMessage) <~ hide <~ text("Success!")
         ) <~ MainTweaks.orient } } }
+
+  def fadeInText(str: String): Snail[TextView] = text(str) ++ fadeIn(100)
+  def showText(str: String): Tweak[TextView] = text(str) + show
 
   override protected def onStart(): Unit = {
     super.onStart()
@@ -73,11 +90,6 @@ class MainActivity extends Activity
     getLocation flatMap {
       case None ⇒ Future.successful("Location not available") //Future.successful ("Location not available")
       case Some(l) ⇒ geocodeLocation(toLoc(l)) map parseGeocoding }
-
-  def shareIntersection(intersection: String): Future[Unit] =
-    getPhoneNumber flatMap { num ⇒
-      phoneNumberPromise = Promise()
-      sendSms(intersection)(num) }
 
   // contact intent passing
   // TODO extract this to a trait!
@@ -102,14 +114,11 @@ class MainActivity extends Activity
   // sms intent passing
   // TODO implement this and extract it to a trait!
 
-  def sendSms(msg: String)(recipient: String): Future[Unit] = {
-    val intent = new Intent(Intent.ACTION_SEND)
-      .setData(Uri.parse("smsto:"))
-      .putExtra("sms_body", msg)
-    resolve(intent) foreach { _ ⇒ startActivity(intent) }
-    Future.successful{()}
-  }
-
+  def sendSms: Future[Unit] = {
+    phoneNumberPromise.future flatMap { recipient ⇒
+      intersectionPromise.future flatMap { msg ⇒
+        SmsManager.getDefault.sendTextMessage(recipient, null, msg, null, null)
+        Future.successful(()) } } }
 
   def resolve(intent: Intent): Option[ComponentName] =
     Option(intent.resolveActivity(getPackageManager))

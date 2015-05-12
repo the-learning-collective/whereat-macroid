@@ -10,7 +10,7 @@ import org.tlc.whereat.msg.{IntersectionRequest, IntersectionResponse, Logger}
 import org.tlc.whereat.net.NetUtil
 import play.api.libs.json.Json
 
-import scala.concurrent.Future
+import scala.concurrent.{Promise, Future}
 
 /**
  * Author: @aguestuser
@@ -29,12 +29,17 @@ trait IntersectionService
   with Logger
   with Conversions {
 
+  var intersectionPromise = Promise[String]()
+
   def geocodeLocation(l: Loc)(implicit appContextProvider: AppContext): Future[IntersectionResponse] =
     requestGeocode(toIntersectionRequest(l))
 
   def parseGeocoding(res: IntersectionResponse): String = res.maybe match {
-    case Some(i) ⇒ i.toString
-    case None ⇒ "Location not available" }
+    case None ⇒ "Location not available"
+    case Some(i) ⇒
+      val res = i.toString()
+      intersectionPromise.success { res }
+      res }
 
   def requestGeocode(req: IntersectionRequest)(implicit appContextProvider: AppContext): Future[IntersectionResponse] = {
 

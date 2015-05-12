@@ -69,13 +69,14 @@ libraryDependencies ++= Seq(
 
 
 proguardCache in Android ++= Seq(
-  ProguardCache("org.macroid") % "macroid" % "2.0.0-M4",
-  ProguardCache("org.macroid") % "macroid-viewable" % "2.0.0-M4",
-  ProguardCache("com.android.support") % "support-v4" % "22.1.1",
-  ProguardCache("com.fortysevendeg") % "macroid-extras" % "0.1-SNAPSHOT",
-  ProguardCache("com.google.android.gms") % "play-services" % "6.5.87",
-  ProguardCache("io.taig") % "communicator" % "2.0.1",
-  ProguardCache("com.typesafe.play") % "play-json" % "2.3.4"
+//  ProguardCache("macroid") % "org.macroid" % "macroid_2.11",
+//  ProguardCache("macroid-viewable") % "org.macroid" % "macroid-viewable_2.11",
+//  ProguardCache("support-v4") % "com.android.support" % "support-v4",
+//  ProguardCache("macroid-extras") % "com.fortysevendeg" % "macroid-extras_2.11",
+  ProguardCache("com.google") % "com.google.android.gms" % "play-services",
+  ProguardCache("io.taig.communicator") % "io.taig" % "communicator_2.11",
+  ProguardCache("play.api.libs.json") % "com.typesafe.play"  % "play-json_2.11",
+  ProguardCache("play.api.libs.functional") % "com.typesafe.play" % "play-functional_2.11"
 )
 
 apkbuildExcludes in Android ++= Seq (
