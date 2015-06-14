@@ -1,7 +1,7 @@
-About WhereⒶt
+oAbout WhereⒶt
 ===============
 
-WhereⒶt is a mobile app to help protesters communicate with each other in realtime during marches. It was born out of years of using (and becoming frustrated with) [Celly](https://cel.ly/) as a member of Occupy Wall Street's Direct Action Working Group, and a participant in recent #BlackLivesMatter marches in NYC. 
+WhereⒶt is a mobile app to help protesters communicate with each other in realtime during marches. It was born out of years of using (and becoming frustrated with) [Celly](https://cel.ly/) as a member of Occupy Wall Street's Direct Action Working Group, and a participant in recent #BlackLivesMatter marches in NYC.
 
 Unlike Celly, WhereⒶt is free and open source software, guaranteed to be tailored to the needs of activists, because it is made by activists. TLC will keep no data, sell no data, and back up privacy and security pledges with code you can inspect (and help write!)
 

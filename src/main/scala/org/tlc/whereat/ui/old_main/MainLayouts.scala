@@ -1,4 +1,4 @@
-package org.tlc.whereat.ui.layouts
+package org.tlc.whereat.ui.old_main
 
 import android.widget._
 import macroid.ActivityContext

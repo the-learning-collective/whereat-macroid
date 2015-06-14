@@ -1,4 +1,4 @@
-package org.tlc.whereat.activities
+package org.tlc.whereat.ui.old_main
 
 import android.app.Activity
 import android.content.{ComponentName, Intent}
@@ -8,10 +8,10 @@ import android.telephony.SmsManager
 import android.widget.{Button, LinearLayout, TextView}
 import macroid.FullDsl._
 import macroid._
+import macroid.contrib.TextTweaks
 import org.tlc.whereat.model.Conversions
 import org.tlc.whereat.msg.Logger
 import org.tlc.whereat.services.{GoogleApiService, IntersectionService}
-import org.tlc.whereat.ui.tweaks.MainTweaks
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
@@ -33,11 +33,22 @@ class MainActivity extends Activity
   implicit lazy val appContextProvider: AppContext = activityAppContext
 
   var intersectionTextView = slot[TextView]
-  var getContactsButton = slot[Button]
+  var shareViaCellyButton = slot[Button]
+  var shareViaPeoplesMicButton = slot[Button]
   var phoneNumberTextView = slot[TextView]
-  var shareLocationButton = slot[Button]
+  var sendTextButton = slot[Button]
   var successMessage = slot[TextView]
+  var resetButton = slot[Button]
 
+  val slots = List(
+    intersectionTextView,
+    shareViaCellyButton,
+    shareViaPeoplesMicButton,
+    phoneNumberTextView,
+    sendTextButton,
+    successMessage,
+    resetButton
+  )
   // Activy UI & life cycle methods
 
   override protected def onCreate(savedInstanceState: Bundle): Unit = {
@@ -49,32 +60,53 @@ class MainActivity extends Activity
       getUi {
         l[LinearLayout](
           w[Button] <~
-            text("Get Location") <~
+            largeText("Get Location") <~
             On.click {
-              (intersectionTextView <~~ getIntersection.map { fadeInText }) ~~
-              (getContactsButton <~~ fadeIn(100))
-            },
+              (intersectionTextView <~~ getIntersection.map { fadeInText } ) ~~
+                ((shareViaPeoplesMicButton <~~ fadeIn(100)) ~
+                 (shareViaCellyButton <~~ fadeIn(100))) },
           w[TextView] <~
             wire(intersectionTextView) <~ hide,
           w[Button] <~
-            wire(getContactsButton) <~ hide <~ text("Get Contacts") <~
+            wire(shareViaPeoplesMicButton) <~ hide <~ largeText("Share via Text") <~
             On.click { 
               (phoneNumberTextView <~~ getPhoneNumber.map { fadeInText }) ~~
-              (shareLocationButton <~~ fadeIn(100))
-            },
+                ((shareViaCellyButton <~ hide) ~
+                 (sendTextButton <~~ fadeIn(100))) },
+          w[Button] <~
+            wire(shareViaCellyButton) <~ hide <~ largeText("Share via Celly") <~
+            On.click {
+              (successMessage <~~ sendSmsToCelly.map( _ ⇒ show)) ~~
+                (resetButton <~ show) },
           w[TextView] <~
             wire(phoneNumberTextView) <~ hide, 
           w[Button] <~
-            wire(shareLocationButton) <~ hide <~ text("Share Location") <~
+            wire(sendTextButton) <~ hide <~ largeText("Send Text") <~
             On.click {
-              successMessage <~~ sendSms.map(_ ⇒ show)
+              (successMessage <~~ sendSmsToFriend.map(_ ⇒ show)) ~
+                (resetButton <~ show)
             },
           w[TextView] <~
-            wire(successMessage) <~ hide <~ text("Success!")
+            wire(successMessage) <~ hide <~ largeText("Success!"),
+          w[Button] <~
+            wire(resetButton) <~ hide <~ largeText("Reset") <~
+            On.click { reset }
         ) <~ MainTweaks.orient } } }
 
-  def fadeInText(str: String): Snail[TextView] = text(str) ++ fadeIn(100)
-  def showText(str: String): Tweak[TextView] = text(str) + show
+
+  def reset =
+//    slots <~ hide TODO: why won't the less verbose version work?
+    (intersectionTextView <~ hide) ~
+    (shareViaPeoplesMicButton <~ hide) ~
+    (shareViaCellyButton <~ hide) ~
+    (phoneNumberTextView <~ hide) ~
+    (sendTextButton <~ hide) ~
+    (successMessage <~ hide) ~
+    (resetButton <~ hide)
+
+  def fadeInText(str: String): Snail[TextView] = largeText(str) ++ fadeIn(100)
+  def showText(str: String): Tweak[TextView] = largeText(str) + show
+  def largeText(str: String): Tweak[TextView] = text(str) + TextTweaks.large
 
   override protected def onStart(): Unit = {
     super.onStart()
@@ -111,16 +143,29 @@ class MainActivity extends Activity
         val numberIndex = cursor.getColumnIndex(CommonDataKinds.Phone.NUMBER)
         phoneNumberPromise.success { cursor.getString(numberIndex) } } } }
 
-  // sms intent passing
-  // TODO implement this and extract it to a trait!
+  private def resolve(intent: Intent): Option[ComponentName] =
+    Option(intent.resolveActivity(getPackageManager))
 
-  def sendSms: Future[Unit] = {
+  // sms intent passing
+  // TODO extract this to a trait!
+
+  def sendSmsToFriend: Future[Unit] = {
     phoneNumberPromise.future flatMap { recipient ⇒
       intersectionPromise.future flatMap { msg ⇒
-        SmsManager.getDefault.sendTextMessage(recipient, null, msg, null, null)
-        Future.successful(()) } } }
+        sendSms(recipient, msg)
+        resetPromises; Future.successful(()) } } }
 
-  def resolve(intent: Intent): Option[ComponentName] =
-    Option(intent.resolveActivity(getPackageManager))
+  def sendSmsToCelly: Future[Unit] = {
+    intersectionPromise.future flatMap { msg ⇒
+      sendSms("23559", s"@teeellsee $msg")
+      resetPromises; Future.successful(()) } }
+
+  def sendSms(recipient: String, msg: String): Unit =
+    SmsManager.getDefault.sendTextMessage(recipient, null, msg, null, null)
+
+  def resetPromises: Unit = {
+    phoneNumberPromise = Promise()
+    intersectionPromise = Promise() }
+
 }
 

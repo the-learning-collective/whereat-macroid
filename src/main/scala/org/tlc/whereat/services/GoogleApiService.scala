@@ -32,7 +32,7 @@ trait GoogleApiService
         Option(LocationServices.FusedLocationApi.getLastLocation(cl)) } }
 
   protected def buildGoogleApiClient(ctx: Context): Option[GoogleApiClient] = {
-    connectionPromise = Promise()
+    connectionPromise = Promise() //TODO: is this line necessary?
     synchronized {
       Some(
         new GoogleApiClient.Builder(ctx)

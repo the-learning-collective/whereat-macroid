@@ -1,4 +1,4 @@
-package org.tlc.whereat.ui.tweaks
+package org.tlc.whereat.ui.old_main
 
 import macroid.AppContext
 import macroid.FullDsl._
