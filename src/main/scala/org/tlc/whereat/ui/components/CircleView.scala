@@ -18,22 +18,11 @@ class CircleView(context: Context, attr: AttributeSet, defStyleAttr: Int)
   extends View(context, attr, defStyleAttr) {
 
   def this(context: Context) = this(context, null, 0)
-
   def this(context: Context, attr: AttributeSet) = this(context, attr, 0)
 
-  private val paint = {
-    val p = new Paint()
-    p.setStyle(Style.FILL)
-    p
-  }
-
-  def setColor(color: Int) = {
-    paint.setColor(color)
-  }
-
-  def getColor: Int = {
-    paint.getColor
-  }
+  private val paint = { val p = new Paint(); p.setStyle(Style.FILL); p}
+  def setColor(color: Int) = paint.setColor(color)
+  def getColor: Int = paint.getColor
 
   override def onDraw(canvas: Canvas): Unit = {
     super.onDraw(canvas)
@@ -44,7 +33,6 @@ class CircleView(context: Context, attr: AttributeSet, defStyleAttr: Int)
 
 object CircleView {
   type W = CircleView
-
 
   def cvColor(color: Int) = Tweak[W] (_.setColor(color))
   def cvColorChange(color: Int) = Tweak[W] ({ cv ⇒  cv.invalidate(); cv.setColor(color) })
